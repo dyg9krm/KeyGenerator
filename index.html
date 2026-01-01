@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Key Generator Pro</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#111111">
+
+    <style>
+        :root {
+            --primary: #e30613;
+            --bg: #111;
+            --surface: #1a1a1a;
+            --text: #ffffff;
+            --accent: #4f4;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .card {
+            background: var(--surface);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+            letter-spacing: 2px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            margin: 25px 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            border: 2px solid #333;
+            color: var(--accent);
+            font-size: 1.2rem;
+            border-radius: 12px;
+            text-align: center;
+            text-transform: uppercase;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.3s;
+            box-shadow: 0 5px 15px rgba(227, 6, 19, 0.3);
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        #result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            border: 1px dashed var(--accent);
+            min-height: 24px;
+        }
+
+        #r {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.4rem;
+            color: var(--accent);
+            word-break: break-all;
+            letter-spacing: 1px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>KEY GENERATOR</h2>
+    
+    <div class="input-group">
+        <input type="text" id="c" placeholder="KODU BURAYA YAZIN" oninput="formatInput(this)" autocomplete="off">
+    </div>
+
+    <button onclick="generateKey()">GENERATE KEY</button>
+
+    <div id="result-box">
+        <div id="r">---- ---- ---- ----</div>
+    </div>
+
+    <div class="footer">Secure SHA-1 Logic v1.0</div>
+</div>
+
+<script>
+    const M = "H7CDEQI4PSQR2UML5XBW1NFOG8YJ03K9NTZV6";
+
+    // Girişi formatla (Her 4 karakterde bir tire)
+    function formatInput(t) {
+        let v = t.value.replace(/[^A-Z0-9]/gi, "").toUpperCase().substr(0, 20);
+        let groups = v.match(/.{1,4}/g);
+        t.value = groups ? groups.join("-") : v;
+    }
+
+    // SHA-1 tabanlı anahtar üretici
+    async function generateKey() {
+        const inputVal = document.getElementById('c').value.replace(/-/g, "");
+        if (!inputVal) {
+            document.getElementById('r').innerText = "KOD GİRİN!";
+            return;
+        }
+
+        try {
+            // Web Crypto API ile gerçek SHA-1 Hash hesaplama
+            const encoder = new TextEncoder();
+            const data = encoder.encode(inputVal);
+            const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+            let key = "";
+            for (let i = 0; i < hashArray.length; i++) {
+                // Hash'i karakter setimize eşle
+                key += M.charAt(hashArray[i] % M.length);
+            }
+
+            // Sonucu formatla
+            document.getElementById('r').innerText = key.match(/.{1,4}/g).join('-');
+        } catch (e) {
+            document.getElementById('r').innerText = "HATA OLUŞTU!";
+        }
+    }
+</script>
+
+</body>
+</html>
